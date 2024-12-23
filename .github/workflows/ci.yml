@@ -43,11 +43,27 @@ jobs:
           go mod tidy
           go mod download
 
-      # Step 5: Build the project (optional but recommended)
+      # Step 5: Install evcli and cocli
+      - name: Install evcli via go install
+        run: go install github.com/veraison/evcli@latest
+
+      - name: Install cocli via go install
+        run: go install github.com/veraison/cocli@latest
+
+      # Step 6: Verify that evcli and cocli are installed
+      - name: Verify evcli Installation
+        run: |
+          evcli --version
+
+      - name: Verify cocli Installation
+        run: |
+          cocli --version
+
+      # Step 7: Build the project (optional but recommended)
       - name: Build Project
         run: go build -v ./...
 
-      # Step 6: Run Unit Tests
+      # Step 8: Run Unit Tests
       - name: Run Unit Tests
         run: go test ./... -v -cover
 
