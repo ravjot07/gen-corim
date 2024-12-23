@@ -1,5 +1,6 @@
-name: CI Test
+name: CI 
 
+# Trigger the workflow on push or pull request events to the main branch
 on:
   push:
     branches:
@@ -9,20 +10,45 @@ on:
       - main
 
 jobs:
-  test:
+  build-and-test:
+    name: Build and Run Unit Tests
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      # Step 1: Checkout the repository
+      - name: Checkout Repository
+        uses: actions/checkout@v3
 
-    - name: Set up Go
-      uses: actions/setup-go@v4
-      with:
-        go-version: '1.20' # Use your Go version
+      # Step 2: Set up Go environment
+      - name: Set Up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.20' # Specify the Go version you are using
 
-    - name: Install dependencies
-      run: go mod tidy
+      # Step 3: Cache Go modules to speed up builds
+      - name: Cache Go Modules
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/go-build
+            # Cache the Go module download directory
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
 
-    - name: Run unit tests
-      run: go test ./... -v
+      # Step 4: Install dependencies
+      - name: Install Dependencies
+        run: |
+          go mod tidy
+          go mod download
+
+      # Step 5: Build the project (optional but recommended)
+      - name: Build Project
+        run: go build -v ./...
+
+      # Step 6: Run Unit Tests
+      - name: Run Unit Tests
+        run: go test ./... -v -cover
+
+      
